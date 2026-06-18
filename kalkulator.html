@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KalkulatorPro™ Premium</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f0f0f;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  .brand { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: #888; text-transform: uppercase; margin-bottom: 12px; }
+  .title { font-size: 28px; font-weight: 900; margin-bottom: 6px; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { font-size: 12px; color: #555; margin-bottom: 10px; letter-spacing: 1px; }
+
+  .trial-bar {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 10px 18px;
+    margin-bottom: 18px;
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 320px;
+  }
+  .trial-dots { display: flex; gap: 5px; }
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #f5c518;
+    transition: all 0.3s;
+  }
+  .dot.used { background: #2a2a2a; border: 1px solid #333; }
+  .trial-text { flex: 1; }
+  .trial-count { font-weight: 700; color: #f5c518; }
+
+  .calculator {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    padding: 24px;
+    width: 320px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  }
+  .display {
+    background: #0d0d0d;
+    border-radius: 12px;
+    padding: 20px 16px 14px;
+    margin-bottom: 20px;
+    text-align: right;
+    border: 1px solid #222;
+  }
+  .display-expr { font-size: 13px; color: #555; min-height: 18px; margin-bottom: 6px; word-break: break-all; }
+  .display-main { font-size: 42px; font-weight: 700; color: #fff; word-break: break-all; line-height: 1; }
+  .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  button { border: none; cursor: pointer; border-radius: 12px; font-size: 18px; font-weight: 600; font-family: 'Inter', sans-serif; height: 64px; transition: all 0.1s; }
+  button:active { transform: scale(0.93); }
+  .btn-num { background: #2a2a2a; color: #fff; border: 1px solid #333; }
+  .btn-num:hover { background: #333; }
+  .btn-op { background: #2d2d1a; color: #f5c518; border: 1px solid #3d3d20; }
+  .btn-op:hover { background: #3a3a20; }
+  .btn-clear { background: #2d1a1a; color: #ff6b6b; border: 1px solid #3d2020; }
+  .btn-clear:hover { background: #3a2020; }
+  .btn-equals { background: linear-gradient(135deg, #f5c518, #e6b800); color: #000; font-weight: 900; grid-column: span 2; border: none; }
+  .btn-equals:hover { filter: brightness(1.1); }
+  .btn-zero { grid-column: span 2; }
+
+  /* OVERLAY */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); z-index: 100; align-items: center; justify-content: center; }
+  .overlay.show { display: flex; }
+  .popup {
+    background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 24px;
+    padding: 36px 30px; width: 320px; text-align: center;
+    box-shadow: 0 60px 100px rgba(0,0,0,0.8);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .popup-lock { font-size: 48px; margin-bottom: 12px; }
+  .popup-tag { font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #f5c518; text-transform: uppercase; margin-bottom: 10px; }
+  .popup-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; line-height: 1.2; }
+  .popup-desc { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+  .popup-desc span { color: #f5c518; font-weight: 600; }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .plan { background: #111; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px 10px; cursor: pointer; transition: all 0.2s; position: relative; }
+  .plan:hover { border-color: #f5c518; }
+  .plan.popular { border-color: #f5c518; }
+  .plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f5c518; color: #000; font-size: 9px; font-weight: 800; letter-spacing: 1px; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+  .plan-name { font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .plan-price { font-size: 22px; font-weight: 900; color: #fff; }
+  .plan-price span { font-size: 11px; font-weight: 400; color: #666; }
+  .btn-subscribe { width: 100%; height: 50px; background: linear-gradient(135deg, #f5c518, #e6b800); color: #000; font-size: 15px; font-weight: 800; border: none; border-radius: 12px; cursor: pointer; margin-bottom: 10px; letter-spacing: 0.5px; font-family: 'Inter', sans-serif; }
+  .btn-subscribe:hover { filter: brightness(1.1); }
+  .btn-later { background: none; color: #444; font-size: 12px; font-weight: 400; height: auto; padding: 8px; border-radius: 8px; width: 100%; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: color 0.2s; display: block; }
+  .btn-later:hover { color: #888; }
+  .features { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; text-align: left; }
+  .feature { font-size: 12px; color: #666; display: flex; align-items: center; gap: 8px; }
+  .feature::before { content: '✓'; color: #f5c518; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .watermark { margin-top: 20px; font-size: 10px; color: #333; letter-spacing: 1px; }
+
+  /* shake animation */
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)}
+    60%{transform:translateX(-6px)}
+    80%{transform:translateX(6px)}
+  }
+  .shake { animation: shake 0.4s ease; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<div class="brand">✦ Trusted by 0 users</div>
+<div class="title">KalkulatorPro™</div>
+<div class="subtitle">EDISI PREMIUM EKSKLUSIF</div>
+
+<div class="trial-bar">
+  <div class="trial-dots" id="trialDots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+  <div class="trial-text">
+    Sisa trial gratis: <span class="trial-count" id="trialCount">5</span>x lihat hasil
+  </div>
+</div>
+
+<div class="calculator">
+  <div class="display">
+    <div class="display-expr" id="expr"></div>
+    <div class="display-main" id="display">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn-clear" onclick="clearAll()">AC</button>
+    <button class="btn-clear" onclick="toggleSign()">+/-</button>
+    <button class="btn-clear" onclick="percent()">%</button>
+    <button class="btn-op" onclick="setOp('/')">÷</button>
+    <button class="btn-num" onclick="input('7')">7</button>
+    <button class="btn-num" onclick="input('8')">8</button>
+    <button class="btn-num" onclick="input('9')">9</button>
+    <button class="btn-op" onclick="setOp('*')">×</button>
+    <button class="btn-num" onclick="input('4')">4</button>
+    <button class="btn-num" onclick="input('5')">5</button>
+    <button class="btn-num" onclick="input('6')">6</button>
+    <button class="btn-op" onclick="setOp('-')">−</button>
+    <button class="btn-num" onclick="input('1')">1</button>
+    <button class="btn-num" onclick="input('2')">2</button>
+    <button class="btn-num" onclick="input('3')">3</button>
+    <button class="btn-op" onclick="setOp('+')">+</button>
+    <button class="btn-num btn-zero" onclick="input('0')">0</button>
+    <button class="btn-num" onclick="inputDot()">.</button>
+    <button class="btn-equals" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<div class="watermark">© 2024 KalkulatorPro Inc. Hak Cipta Dilindungi Undang-Undang (katanya)</div>
+
+<!-- POPUP -->
+<div class="overlay" id="overlay">
+  <div class="popup" id="popupBox">
+    <!-- diisi via JS -->
+  </div>
+</div>
+
+<script>
+  let current = '0', operator = null, prev = null, newInput = false;
+  let trialLeft = 3;
+  let lastExpr = '';
+
+  const funnyMessages = [
+    { emoji: '😮', title: 'Wah Hampir Ketahuan!', desc: 'Kamu udah pakai <span>1 dari 3 trial gratis</span>. Masih ada 2 lagi sebelum dompet kamu kami serang 😈' },
+    { emoji: '😬', title: 'Hei, Serius Nih!', desc: 'Ini trial ke-2 dari 3. <span>Udah mau habis lho.</span> Masa iya mau ngitung doang harus bayar? Iya. Harus. Bayar.' },
+    { emoji: '🥺', title: 'Yang Terakhir Ini Ya...', desc: 'Trial ke-3. Yang <span>T-E-R-A-K-H-I-R.</span> Habis ini kamu harus langganan atau buka kalkulator HP kayak orang miskin 😭' },
+  ];
+
+  function updateDisplay(val) { document.getElementById('display').textContent = val; }
+  function input(num) {
+    if (newInput) { current = num; newInput = false; }
+    else { current = current === '0' ? num : current + num; }
+    updateDisplay(current);
+  }
+  function inputDot() {
+    if (newInput) { current = '0.'; newInput = false; }
+    else if (!current.includes('.')) current += '.';
+    updateDisplay(current);
+  }
+  function clearAll() {
+    current = '0'; operator = null; prev = null; newInput = false;
+    document.getElementById('expr').textContent = '';
+    updateDisplay('0');
+  }
+  function toggleSign() { current = String(parseFloat(current) * -1); updateDisplay(current); }
+  function percent() { current = String(parseFloat(current) / 100); updateDisplay(current); }
+  function setOp(op) {
+    prev = parseFloat(current); operator = op; newInput = true;
+    const sym = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+    document.getElementById('expr').textContent = `${prev} ${sym[op]}`;
+  }
+
+  function updateTrialBar() {
+    const dots = document.querySelectorAll('.dot');
+    const count = document.getElementById('trialCount');
+    dots.forEach((d, i) => {
+      if (i >= trialLeft) d.classList.add('used');
+      else d.classList.remove('used');
+    });
+    if (trialLeft > 0) {
+      count.textContent = trialLeft + 'x';
+      count.style.color = trialLeft <= 2 ? '#ff6b6b' : '#f5c518';
+    } else {
+      count.textContent = 'HABIS 💀';
+      count.style.color = '#ff6b6b';
+    }
+  }
+
+  function calculate() {
+    if (operator === null || prev === null) return;
+    const a = prev, b = parseFloat(current);
+    const sym = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+    lastExpr = `${a} ${sym[operator]} ${b}`;
+    const realResult = eval(`${a} ${operator} ${b}`);
+
+    if (trialLeft > 0) {
+      const idx = 3 - trialLeft; // 0..4
+      trialLeft--;
+      updateTrialBar();
+      showTrialPopup(funnyMessages[idx], realResult, lastExpr);
+    } else {
+      showHabisPopup(lastExpr);
+    }
+  }
+
+  function showTrialPopup(msg, result, expr) {
+    const box = document.getElementById('popupBox');
+    // tampilkan hasil TAPI diblur dan minta langganan
+    box.innerHTML = `
+      <div class="popup-lock">${msg.emoji}</div>
+      <div class="popup-tag">✦ Trial Gratis ${3 - trialLeft} / 3</div>
+      <div class="popup-title">${msg.title}</div>
+      <div class="popup-desc">${msg.desc}</div>
+      <div style="background:#0d0d0d;border-radius:12px;padding:14px;margin-bottom:18px;position:relative;overflow:hidden;">
+        <div style="font-size:11px;color:#555;margin-bottom:4px;">Hasil dari ${expr} =</div>
+        <div style="font-size:40px;font-weight:900;color:#f5c518;filter:blur(8px);user-select:none;">${result}</div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888;">🔒 Blur dulu ah~</div>
+      </div>
+      <div class="plans">
+        <div class="plan"><div class="plan-name">Bulanan</div><div class="plan-price">Rp99k<span>/bln</span></div></div>
+        <div class="plan popular"><div class="plan-badge">🔥 TERLARIS</div><div class="plan-name">Tahunan</div><div class="plan-price">Rp999k<span>/thn</span></div></div>
+      </div>
+      <button class="btn-subscribe" onclick="fakePay()">Bayar Sekarang 💳</button>
+      <button class="btn-later" onclick="closeAndShow(${result})">Lihat dulu (sisa ${trialLeft}x)</button>
+    `;
+    document.getElementById('overlay').classList.add('show');
+  }
+
+  function showHabisPopup(expr) {
+    const box = document.getElementById('popupBox');
+    box.innerHTML = `
+      <div class="popup-lock">💀</div>
+      <div class="popup-tag">✦ TRIAL HABIS</div>
+      <div class="popup-title">Yah, Udah Habis...</div>
+      <div class="popup-desc">Trial gratis kamu udah <span>HABIS TOTAL</span>. Kamu nggak bisa lihat hasil ${expr} tanpa berlangganan. Selamat menghitung manual! 😊</div>
+      <div class="features">
+        <div class="feature">Lihat hasil tanpa batas</div>
+        <div class="feature">Tidak perlu hitung manual</div>
+        <div class="feature">Tidak perlu buka kalkulator hp</div>
+        <div class="feature">Terasa pintar (palsu)</div>
+      </div>
+      <div class="plans">
+        <div class="plan"><div class="plan-name">Bulanan</div><div class="plan-price">Rp99k<span>/bln</span></div></div>
+        <div class="plan popular"><div class="plan-badge">🔥 TERLARIS</div><div class="plan-name">Tahunan</div><div class="plan-price">Rp999k<span>/thn</span></div></div>
+      </div>
+      <button class="btn-subscribe" onclick="fakePay()">Oke Oke Bayar 💸</button>
+      <button class="btn-later" onclick="closePopup()">Tidak, saya akan buka kalkulator hp 😔</button>
+    `;
+    document.getElementById('overlay').classList.add('show');
+  }
+
+  function closeAndShow(result) {
+    document.getElementById('overlay').classList.remove('show');
+    // kasih liat hasilnya sebentar sambil bilang sisa trial
+    document.getElementById('display').textContent = result;
+    document.getElementById('expr').textContent = '';
+    operator = null; prev = null; newInput = true;
+    current = String(result);
+
+    if (trialLeft === 0) {
+      // kasih warning
+      const bar = document.querySelector('.trial-bar');
+      bar.classList.add('shake');
+      setTimeout(() => bar.classList.remove('shake'), 500);
+    }
+  }
+
+  function closePopup() {
+    document.getElementById('overlay').classList.remove('show');
+    clearAll();
+  }
+
+  function fakePay() {
+    const box = document.getElementById('popupBox');
+    box.innerHTML = `
+      <div style="font-size:60px;margin-bottom:16px">💳</div>
+      <div style="font-size:18px;font-weight:900;margin-bottom:10px">Memproses Pembayaran...</div>
+      <div style="font-size:13px;color:#555;margin-bottom:24px">Menghubungi bank kamu...</div>
+      <div style="font-size:40px;display:inline-block;animation:spin 1s linear infinite">⏳</div>
+    `;
+    setTimeout(() => {
+      box.innerHTML = `
+        <div style="font-size:60px;margin-bottom:16px">❌</div>
+        <div style="font-size:20px;font-weight:900;margin-bottom:10px">Pembayaran Gagal</div>
+        <div style="font-size:13px;color:#555;margin-bottom:6px;">Bank kamu menolak transaksi ini.</div>
+        <div style="font-size:13px;color:#555;margin-bottom:4px;">Kode error: <span style="color:#ff6b6b;font-weight:700;">KAMU_BOKEK_404</span></div>
+        <div style="font-size:13px;color:#555;margin-bottom:24px;">Hubungi customer service kami di nomor yang tidak ada.</div>
+        <button onclick="closePopup()" style="width:100%;height:48px;background:#2a2a2a;color:#fff;font-weight:700;font-size:14px;border:none;border-radius:12px;cursor:pointer;font-family:Inter,sans-serif;margin-bottom:10px;">Coba Kartu Lain</button>
+        <button onclick="closePopup()" style="background:none;border:none;color:#444;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;">Saya akan buka kalkulator bawaan hp 😭</button>
+      `;
+    }, 2500);
+  }
+
+  updateTrialBar();
+</script>
+</body>
+</html>
